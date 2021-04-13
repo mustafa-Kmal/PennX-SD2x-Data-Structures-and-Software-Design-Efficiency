@@ -1,5 +1,4 @@
 
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,14 +28,14 @@ public class PlagiarismDetector {
 
 			for (int i = 0; i < files.length; i++) {
 				String file1 = files[i]; 
-				List<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
+				ArrayList<String> file1Phrases = createPhrases(dirName + "/" + file1, windowSize); 
 
 
 				if (file1Phrases != null ) {
 					for (int j = 0; j < files.length; j++) { 
 						String file2 = files[j]; if(file2 == null ) continue;
 
-						List<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
+						ArrayList<String> file2Phrases = createPhrases(dirName + "/" + file2, windowSize); 
 
 
 
@@ -45,12 +44,12 @@ public class PlagiarismDetector {
 							List<String> matches = findMatches(file1Phrases, file2Phrases);
 
 
-							if (matches != null) {
-								if (matches.size() > threshold  && (!numberOfMatches.containsKey(file2 + "-" + file1) && !file1.equals(file2) )) {
-									numberOfMatches.put(file2 + "-" + file1,matches.size());
-
+							if (matches.size() > threshold) {
+								String key = file1 + "-" + file2;
+								if (numberOfMatches.containsKey(file2 + "-" + file1) == false && file1.equals(file2) == false) {
+									numberOfMatches.put(key,matches.size());
 								}
-							}
+							}	
 						}
 					}
 
@@ -79,6 +78,7 @@ public class PlagiarismDetector {
 			Scanner in = new Scanner(new File(filename));
 			while (in.hasNext()) {
 				String word= in.next().replaceAll("[^a-zA-Z]", "").toUpperCase();
+				//if (!words.contains(word))
 				words.add(word);
 			}
 		}
@@ -95,21 +95,21 @@ public class PlagiarismDetector {
 	 * This method reads a file and converts it into a Set/List of distinct phrases,
 	 * each of size "window". The Strings in each phrase are whitespace-separated.
 	 */
-	protected static List<String> createPhrases(String filename, int window) {
+	protected static ArrayList<String> createPhrases(String filename, int window) {
 
 
 		if (!(filename == null || window < 1)) {
 			List<String> words = readFile(filename);
 
 
-			List<String> phrases = new ArrayList<String>();
+			ArrayList<String> phrases = new ArrayList<String>();
 
 			for (int i = 0; i < words.size() - window + 1; i++) {
 				String phrase = "";
 				for (int j = 0; j < window; j++) {
 					phrase += words.get(i+j) + " ";
 				}
-
+				//if (!phrases.contains(phrase))
 				phrases.add(phrase);
 
 			}
@@ -129,10 +129,7 @@ public class PlagiarismDetector {
 	 * However, the comparison is case-insensitive.
 	 */
 
-	protected static List<String> findMatches(List<String> myPhrases, List<String> yourPhrases) {
-
-
-
+	protected static List<String> findMatches(ArrayList<String> myPhrases, ArrayList<String> yourPhrases) {
 
 		List<String> matches = new ArrayList<String>();
 
@@ -141,7 +138,7 @@ public class PlagiarismDetector {
 
 			for (String mine : myPhrases) {
 				for (String yours : yourPhrases) {
-					if (mine.equalsIgnoreCase(yours)) {
+					if (mine.equalsIgnoreCase(yours)  && !matches.contains(mine)) {
 						matches.add(mine);
 					}
 				}
